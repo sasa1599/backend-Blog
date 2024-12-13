@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum BlogCategory {
+  Sport
+  Health
+  Food
+  Tech
+}
+
+enum RoleUser {
+  User
+  Admin
+}
+
+enum Typepoint {
+  Redeem
+  refferal
+}
+
+enum StatusOrder {
+  cancel
+  pending
+  paid
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  email        String   @unique
+  password     String
+  avatar       String? //? = not null
+  role         RoleUser @default(User)
+  loginAttempt Int      @default(0)
+  isSuspend    Boolean  @default(false)
+  isVerify     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updateAt     DateTime @updatedAt
+  Blog         Blog[]
+  refCode      String   @default("")
+  refferedCode String?
+
+  Order Order[]
+}
+
+model Blog {
+  id        String       @id @default(uuid())
+  title     String       @unique
+  slug      String       @unique
+  category  BlogCategory
+  content   Json
+  thumbnail String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  userId    Int          @unique
+  user      User         @relation(fields: [userId], references: [id])
+}
+
+model UserPoint {
+  id         Int      @id
+  point      Int
+  created_at DateTime
+  expireDate DateTime
+  isRedeem   Boolean  @default(false)
+  userId     Int
+}
+
+model Order {
+  id           String      @id @default(uuid())
+  price        Int
+  status       StatusOrder @default(pending)
+  redirect_url String?
+  createdAt    DateTime    @default(now())
+  expiredAt    DateTime
+  userId       Int
+  user         User        @relation(fields: [userId], references: [id])
+}
+
+model Tdd {
+  id String @id
+}
